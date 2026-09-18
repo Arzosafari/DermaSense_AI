@@ -1,0 +1,167 @@
+[
+  {
+    "analysis_id": "6a05149c-abda-4bad-a9d7-98389c9fa6a1",
+    "timestamp": "2026-08-14T17:05:39.212464",
+    "predicted_class": "basal cell carcinoma",
+    "confidence": 0.8592,
+    "top3_predictions": [
+      {
+        "class": "basal cell carcinoma",
+        "probability": 0.8592
+      },
+      {
+        "class": "melanocytic nevus",
+        "probability": 0.0311
+      },
+      {
+        "class": "dermatofibroma",
+        "probability": 0.0242
+      }
+    ],
+    "screening_score": 37,
+    "screening_level": "urgent",
+    "user_symptoms": "Analyze this image",
+    "medical_context": {
+      "age": 23,
+      "medical_history": null,
+      "allergies": "nuts",
+      "skin_type": "sensitive"
+    },
+    "image_stored": true,
+    "structured_analysis": {
+      "timestamp": "2026-08-14T17:05:39.212464",
+      "user_id": "mahsa 1",
+      "input": {
+        "image": true,
+        "message": "Analyze this image"
+      },
+      "profile_context": {
+        "age": 23,
+        "medical_history": null,
+        "allergies": "nuts",
+        "skin_type": "sensitive"
+      },
+      "model": {
+        "name": "PanDerm",
+        "predicted_class": "basal cell carcinoma",
+        "confidence": 0.8592,
+        "top3_predictions": [
+          {
+            "class": "basal cell carcinoma",
+            "probability": 0.8592
+          },
+          {
+            "class": "melanocytic nevus",
+            "probability": 0.0311
+          },
+          {
+            "class": "dermatofibroma",
+            "probability": 0.0242
+          }
+        ],
+        "all_probabilities": {
+          "melanocytic nevus": 0.0311,
+          "melanoma": 0.0202,
+          "benign keratosis": 0.0139,
+          "basal cell carcinoma": 0.8592,
+          "actinic keratosis": 0.0143,
+          "vascular lesion": 0.0226,
+          "dermatofibroma": 0.0242,
+          "squamous cell carcinoma": 0.0145
+        }
+      },
+      "visual_analysis": {
+        "available": false,
+        "findings": []
+      },
+      "abcde": {
+        "available": false,
+        "score": 0,
+        "criteria": {
+          "asymmetry": false,
+          "border": false,
+          "color": false,
+          "diameter": false,
+          "evolution": false
+        }
+      },
+      "risk_assessment": {
+        "screening_score": 37,
+        "screening_level": "urgent",
+        "score_type": "AI-generated screening indicator",
+        "score_disclaimer": "This is an AI screening indicator, not a clinically validated cancer-risk score",
+        "is_malignant_prediction": true,
+        "predicted_class": "basal cell carcinoma",
+        "confidence": 0.8592,
+        "urgency_message": "See a dermatologist within 1-2 weeks (sooner if lesion is changing)",
+        "factors": [
+          "Malignant class predicted: basal cell carcinoma (86%)"
+        ],
+        "abcde_applicable": true
+      },
+      "symptom_analysis": {
+        "symptoms": [
+          "Analyze this image"
+        ],
+        "possible_conditions": []
+      },
+      "image_quality": {
+        "acceptable": true,
+        "checks": {
+          "resolution": {
+            "pass": true,
+            "current": "679x450",
+            "message": "Resolution acceptable"
+          },
+          "blur": {
+            "pass": true,
+            "current": 13442.187781368995,
+            "message": "Sharpness acceptable (variance: 13442.2)"
+          },
+          "brightness": {
+            "pass": true,
+            "current": 178.8163181148748,
+            "message": "Brightness acceptable (178.8)"
+          },
+          "contrast": {
+            "pass": true,
+            "current": 23.24707480065749,
+            "message": "Contrast acceptable (23.2)"
+          },
+          "color_content": {
+            "pass": true,
+            "current": 23.23234866653568,
+            "message": "Color content acceptable (variation: 23.2)"
+          }
+        },
+        "message": "Image quality acceptable for analysis"
+      },
+      "recommendations": {
+        "timeframe": "Within 1-2 weeks (sooner if rapidly changing)",
+        "specialist": "Board-certified dermatologist",
+        "visit_type": "Urgent skin cancer screening",
+        "bring": [
+          "Clear photos of the lesion (with dates if available)",
+          "List of medications and allergies",
+          "Family history of skin cancer",
+          "ABCDE symptom notes"
+        ],
+        "questions": [
+          "Could this be melanoma or another skin cancer?",
+          "Do I need a biopsy?",
+          "How urgently should this be treated?",
+          "What follow-up schedule do you recommend?"
+        ]
+      },
+      "explainability": {
+        "available": true,
+        "method": "class_specific_gradient_attribution",
+        "target_class_idx": 3,
+        "heatmap_path": "D:/final-project/v7-added edit profile/v4/SmartHealth-LLM/backend/app/generated_heatmaps/00b08abc-0116-453d-893b-8e662fbe1daf_heatmap.png",
+        "overlay_path": "D:/final-project/v7-added edit profile/v4/SmartHealth-LLM/backend/app/generated_heatmaps/00b08abc-0116-453d-893b-8e662fbe1daf_overlay.png",
+        "original_path": "D:/final-project/v7-added edit profile/v4/SmartHealth-LLM/backend/app/generated_heatmaps/00b08abc-0116-453d-893b-8e662fbe1daf_original.png"
+      },
+      "disclaimer": "This AI screening is for educational purposes only and is NOT a medical diagnosis."
+    }
+  }
+]

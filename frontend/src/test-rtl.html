@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTL Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-case {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .rtl-content {
+            direction: rtl;
+            text-align: right;
+            unicode-bidi: plaintext;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .ltr-content {
+            direction: ltr;
+            text-align: left;
+            unicode-bidi: plaintext;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .embedded-ltr {
+            unicode-bidi: isolate;
+            direction: ltr;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Persian RTL Test</h1>
+        
+        <div class="test-case">
+            <div class="test-label">Test 1: Pure Persian Text</div>
+            <div class="rtl-content" lang="fa">
+                فارسی
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <div class="test-label">Test 2: Persian Sentence</div>
+            <div class="rtl-content" lang="fa">
+                این یک گزارش پزشکی برای بررسی پوست است.
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <div class="test-label">Test 3: Mixed Persian + English Term</div>
+            <div class="rtl-content" lang="fa">
+                احتمال <span class="embedded-ltr">melanoma</span> برابر با <span class="embedded-ltr">87.15%</span> است.
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <div class="test-label">Test 4: Mixed Persian + English Classification</div>
+            <div class="rtl-content" lang="fa">
+                <span class="embedded-ltr">Basal Cell Carcinoma</span> — <span class="embedded-ltr">87.15%</span>
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <div class="test-label">Test 5: Persian with Technical Identifier</div>
+            <div class="rtl-content" lang="fa">
+                نام فایل: <span class="embedded-ltr">report_2026.pdf</span>
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <div class="test-label">Test 6: English (for comparison)</div>
+            <div class="ltr-content" lang="en">
+                This is an English text for comparison.
+            </div>
+        </div>
+        
+        <div class="test-case">
+            <div class="test-label">Test 7: Number Sequence in Persian Context</div>
+            <div class="rtl-content" lang="fa">
+                تاریخ: <span class="embedded-ltr">2026-08-17</span> و زمان: <span class="embedded-ltr">14:30</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

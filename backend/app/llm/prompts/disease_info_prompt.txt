@@ -1,0 +1,33 @@
+You are a skin disease information extractor. Extract the disease name from the user's message for database lookup.
+
+USER MESSAGE: {{INPUT}}
+
+NER CONTEXT: {{NER_CONTEXT}}
+
+SKIN DISEASES IN OUR DATABASE:
+- cellulitis, impetigo, athlete-foot, nail-fungus, ringworm
+- cutaneous-larva-migrans, chickenpox, shingles
+- و بیماری‌های پوستی دیگر
+
+INSTRUCTIONS:
+1. Extract the skin disease name the user is asking about
+2. If the disease name is in Persian, provide the English equivalent for database lookup
+3. Return ONLY a JSON object
+
+OUTPUT (JSON ONLY):
+{
+    "disease": "disease_name_in_english_for_db_lookup",
+    "language": "en or fa"
+}
+
+Example 1 - English:
+Input: "Tell me about impetigo"
+Output: {"disease": "impetigo", "language": "en"}
+
+Example 2 - Persian:
+Input: "در مورد بیماری زردزخم توضیح بده"
+Output: {"disease": "impetigo", "language": "fa"}
+
+Example 3 - No disease found:
+Input: "What causes skin problems?"
+Output: {"disease": "none", "language": "en"}

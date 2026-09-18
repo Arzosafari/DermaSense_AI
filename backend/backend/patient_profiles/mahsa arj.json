@@ -1,0 +1,23 @@
+{
+  "age": 22,
+  "gender": "female",
+  "skin_type": "oily",
+  "sun_exposure": "moderate",
+  "chronic_conditions": [
+    "eczema"
+  ],
+  "current_medications": [
+    "none"
+  ],
+  "allergies": [
+    "latex"
+  ],
+  "smoking": false,
+  "alcohol_consumption": "none",
+  "exercise_frequency": "occasional",
+  "skin_concerns": [],
+  "user_id": "mahsa arj",
+  "updated_at": "2026-08-10T21:01:58.943123",
+  "created_at": "2026-08-10T21:01:58.943123",
+  "computed_risk_factors": []
+}

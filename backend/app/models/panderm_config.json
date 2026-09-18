@@ -1,0 +1,20 @@
+{
+  "model_type": "panderm",
+  "variant": "large",
+  "num_classes": 7,
+  "input_size": 224,
+  "isic_version": "2019",
+  "class_codes": ["mel", "nv", "bcc", "akiec", "bkl", "df", "vasc"],
+  "class_names": [
+    "melanoma",
+    "melanocytic nevus",
+    "basal cell carcinoma",
+    "actinic keratosis",
+    "benign keratosis",
+    "dermatofibroma",
+    "vascular lesion"
+  ],
+  "normalize_mean": [0.485, 0.456, 0.406],
+  "normalize_std": [0.229, 0.224, 0.225],
+  "notes": "Replace checkpoint at app/models/panderm_isic_best.pth after Colab training"
+}

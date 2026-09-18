@@ -1,0 +1,296 @@
+"""
+Analysis History Service - MySQL Database Version
+
+This service enables users to track their skin analyses over time, allowing for
+comparison of predictions and monitoring of changes in lesions.
+"""
+import logging
+from typing import Dict, Any, List, Optional
+import uuid
+from datetime import datetime
+
+from app.core.database_service import database_service
+
+logger = logging.getLogger(__name__)
+
+
+class AnalysisHistoryService:
+    """Service for managing skin analysis history for users using MySQL."""
+    
+    def __init__(self):
+        self.logger = logger
+    
+    def save_analysis(
+        self,
+        user_id: str,
+        analysis_data: Dict[str, Any],
+        image_base64: Optional[str] = None
+    ) -> str:
+        """
+        Save a new analysis to the user's history.
+        
+        Args:
+            user_id: User identifier (username)
+            analysis_data: Analysis results including prediction, confidence, etc.
+            image_base64: Base64 encoded image (optional, for storage)
+            
+        Returns:
+            Analysis ID
+        """
+        logger.info(f"save_analysis called - explainability: {analysis_data.get('explainability', {})}")
+        
+        analysis_id = str(uuid.uuid4())
+        
+        # Prepare analysis record for database
+        analysis_record = {
+            "analysis_id": analysis_id,
+            "timestamp": analysis_data.get("timestamp", datetime.now().isoformat()),
+            "predicted_class": analysis_data.get("model", {}).get("predicted_class"),
+            "confidence": analysis_data.get("model", {}).get("confidence"),
+            "top3_predictions": analysis_data.get("model", {}).get("top3_predictions", []),
+            "screening_score": analysis_data.get("risk_assessment", {}).get("screening_score"),
+            "screening_level": analysis_data.get("risk_assessment", {}).get("screening_level"),
+            "user_symptoms": analysis_data.get("input", {}).get("message"),
+            "medical_context": analysis_data.get("profile_context"),
+            "image_stored": image_base64 is not None,
+            "structured_analysis": analysis_data,  # Store the full structured analysis
+            "all_probabilities": analysis_data.get("model", {}).get("all_probabilities"),
+            "explainability": analysis_data.get("explainability")
+        }
+        
+        logger.info(f"analysis_record created with explainability: {analysis_record.get('explainability', {})}")
+        
+        # Save to database
+        try:
+            database_service.save_screening_history(user_id, analysis_record)
+            logger.info(f"Saved analysis {analysis_id} for user {user_id}")
+            return analysis_id
+        except Exception as e:
+            logger.error(f"Failed to save analysis for user {user_id}: {e}")
+            return ""
+    
+    def get_user_history(self, user_id: str, limit: int = 20) -> List[Dict[str, Any]]:
+        """
+        Get analysis history for a user.
+        
+        Args:
+            user_id: User identifier (username)
+            limit: Maximum number of records to return
+            
+        Returns:
+            List of analysis records
+        """
+        return database_service.get_screening_history(user_id, limit)
+    
+    def get_analysis(self, user_id: str, analysis_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get a specific analysis by ID.
+        
+        Args:
+            user_id: User identifier (username)
+            analysis_id: Analysis ID
+            
+        Returns:
+            Analysis record or None if not found
+        """
+        return database_service.get_screening_by_id(user_id, analysis_id)
+    
+    def compare_analyses(
+        self, 
+        user_id: str, 
+        analysis_id_1: str, 
+        analysis_id_2: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Compare two analyses and highlight differences.
+        
+        Args:
+            user_id: User identifier (username)
+            analysis_id_1: First analysis ID
+            analysis_id_2: Second analysis ID
+            
+        Returns:
+            Comparison result or None if analyses not found
+        """
+        analysis_1 = self.get_analysis(user_id, analysis_id_1)
+        analysis_2 = self.get_analysis(user_id, analysis_id_2)
+        
+        if not analysis_1 or not analysis_2:
+            return None
+        
+        comparison = {
+            "analysis_1": {
+                "id": analysis_id_1,
+                "timestamp": analysis_1.get("timestamp"),
+                "predicted_class": analysis_1.get("predicted_class") or analysis_1.get("structured_analysis", {}).get("model", {}).get("predicted_class"),
+                "confidence": analysis_1.get("confidence") or analysis_1.get("structured_analysis", {}).get("model", {}).get("confidence", 0),
+                "screening_level": analysis_1.get("screening_level") or analysis_1.get("structured_analysis", {}).get("risk_assessment", {}).get("screening_level")
+            },
+            "analysis_2": {
+                "id": analysis_id_2,
+                "timestamp": analysis_2.get("timestamp"),
+                "predicted_class": analysis_2.get("predicted_class") or analysis_2.get("structured_analysis", {}).get("model", {}).get("predicted_class"),
+                "confidence": analysis_2.get("confidence") or analysis_2.get("structured_analysis", {}).get("model", {}).get("confidence", 0),
+                "screening_level": analysis_2.get("screening_level") or analysis_2.get("structured_analysis", {}).get("risk_assessment", {}).get("screening_level")
+            },
+            "differences": []
+        }
+        
+        # Check for class change
+        predicted_class_1 = analysis_1.get("predicted_class") or analysis_1.get("structured_analysis", {}).get("model", {}).get("predicted_class")
+        predicted_class_2 = analysis_2.get("predicted_class") or analysis_2.get("structured_analysis", {}).get("model", {}).get("predicted_class")
+        
+        if predicted_class_1 != predicted_class_2:
+            comparison["differences"].append({
+                "type": "class_change",
+                "from": predicted_class_1,
+                "to": predicted_class_2,
+                "significance": "high" if self._is_malignant_change(
+                    predicted_class_1,
+                    predicted_class_2
+                ) else "medium"
+            })
+        
+        # Check for confidence change
+        confidence_1 = analysis_1.get("confidence") or analysis_1.get("structured_analysis", {}).get("model", {}).get("confidence", 0)
+        confidence_2 = analysis_2.get("confidence") or analysis_2.get("structured_analysis", {}).get("model", {}).get("confidence", 0)
+        
+        conf_diff = abs(confidence_1 - confidence_2)
+        if conf_diff > 0.2:  # More than 20% difference
+            comparison["differences"].append({
+                "type": "confidence_change",
+                "from": f"{confidence_1:.2%}",
+                "to": f"{confidence_2:.2%}",
+                "difference": f"{conf_diff:.2%}"
+            })
+        
+        # Check for screening level change
+        screening_level_1 = analysis_1.get("screening_level") or analysis_1.get("structured_analysis", {}).get("risk_assessment", {}).get("screening_level")
+        screening_level_2 = analysis_2.get("screening_level") or analysis_2.get("structured_analysis", {}).get("risk_assessment", {}).get("screening_level")
+        
+        if screening_level_1 != screening_level_2:
+            comparison["differences"].append({
+                "type": "screening_level_change",
+                "from": screening_level_1,
+                "to": screening_level_2
+            })
+        
+        # Time difference
+        try:
+            time1 = datetime.fromisoformat(analysis_1.get("timestamp", ""))
+            time2 = datetime.fromisoformat(analysis_2.get("timestamp", ""))
+            time_diff = abs((time2 - time1).days)
+            comparison["time_difference_days"] = time_diff
+        except:
+            pass
+        
+        return comparison
+    
+    def _is_malignant_change(self, class1: str, class2: str) -> bool:
+        """Check if the class change involves malignancy."""
+        malignant_keywords = ["melanoma", "carcinoma", "malignant"]
+        class1_malignant = any(kw in class1.lower() for kw in malignant_keywords)
+        class2_malignant = any(kw in class2.lower() for kw in malignant_keywords)
+        return class1_malignant != class2_malignant
+    
+    def get_trend_analysis(self, user_id: str, days: int = 30) -> Dict[str, Any]:
+        """
+        Analyze trends in user's analyses over time.
+        
+        Args:
+            user_id: User identifier (username)
+            days: Number of days to look back
+            
+        Returns:
+            Trend analysis results
+        """
+        # Get all history (not limited) for trend analysis
+        all_history = self.get_user_history(user_id, limit=1000)
+        
+        # Filter by date
+        cutoff_date = datetime.now().timestamp() - (days * 24 * 60 * 60)
+        recent_analyses = [
+            a for a in all_history 
+            if datetime.fromisoformat(a.get("timestamp", "")).timestamp() > cutoff_date
+        ]
+        
+        if not recent_analyses:
+            return {
+                "message": f"No analyses found in the last {days} days",
+                "total_analyses": len(all_history)
+            }
+        
+        # Calculate statistics
+        classes = [a.get("predicted_class") for a in recent_analyses]
+        confidences = [a.get("confidence", 0) for a in recent_analyses]
+        screening_scores = [a.get("screening_score", 0) for a in recent_analyses]
+        
+        # Most common predictions
+        from collections import Counter
+        class_counts = Counter(classes)
+        
+        return {
+            "period_days": days,
+            "total_analyses": len(recent_analyses),
+            "average_confidence": sum(confidences) / len(confidences) if confidences else 0,
+            "average_screening_score": sum(screening_scores) / len(screening_scores) if screening_scores else 0,
+            "most_common_classes": class_counts.most_common(3),
+            "trend": self._calculate_trend(screening_scores),
+            "recommendation": self._get_trend_recommendation(screening_scores, classes)
+        }
+    
+    def _calculate_trend(self, scores: List[float]) -> str:
+        """Calculate trend direction from scores."""
+        if len(scores) < 2:
+            return "insufficient_data"
+        
+        # Simple linear trend
+        recent_avg = sum(scores[-3:]) / min(3, len(scores))
+        earlier_avg = sum(scores[:-3]) / max(1, len(scores) - 3) if len(scores) > 3 else scores[0]
+        
+        if recent_avg > earlier_avg + 5:
+            return "increasing"
+        elif recent_avg < earlier_avg - 5:
+            return "decreasing"
+        else:
+            return "stable"
+    
+    def _get_trend_recommendation(self, scores: List[float], classes: List[str]) -> str:
+        """Get recommendation based on trend."""
+        trend = self._calculate_trend(scores)
+        
+        if trend == "increasing":
+            return "Screening scores have been increasing. Consider professional evaluation if this trend continues."
+        elif trend == "decreasing":
+            return "Screening scores have been decreasing. Continue regular monitoring."
+        else:
+            return "Screening scores have been stable. Continue regular monitoring and report any changes."
+    
+    def delete_analysis(self, user_id: str, analysis_id: str) -> bool:
+        """
+        Delete a specific analysis from history.
+        
+        Args:
+            user_id: User identifier (username)
+            analysis_id: Analysis ID to delete
+            
+        Returns:
+            True if deleted, False otherwise
+        """
+        return database_service.delete_screening(user_id, analysis_id)
+    
+    def clear_user_history(self, user_id: str) -> bool:
+        """
+        Clear all analysis history for a user.
+        
+        Args:
+            user_id: User identifier (username)
+            
+        Returns:
+            True if cleared, False otherwise
+        """
+        return database_service.clear_screening_history(user_id)
+
+
+# Global instance
+analysis_history_service = AnalysisHistoryService()

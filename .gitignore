@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+venv_clean/
+.env
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/.cache/
+
+# Model files
+*.pth
+*.pt
+*.bin
+*.safetensors
+*.onnx
+*.h5
+*.ot
+
+# Model directories
+backend/app/utils/models/
+backend/app/models/panderm/checkpoints/
+
+# Cache
+.cache/
+*.cache
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
