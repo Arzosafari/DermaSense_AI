@@ -153,6 +153,8 @@ DermaSense AI is an **academic research project** and is not intended to provide
 This project is licensed under the **MIT License**.
 
 Third-party models, datasets, libraries, and other resources remain subject to their respective licenses.
+## 📌 Project Attribution 
+This project builds upon the initial structure of the **SmartHealth-LLM** project. The original structure was further developed, extended, and modified to create the current **DermaSense AI** system, including additional features, architectural improvements, and integrations.
 
 ## 👩‍💻 Authors
 
